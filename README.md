@@ -18,7 +18,7 @@ Have you ever wondered who you share classes with? Friend Finder is a simple loc
 
 ```bash
 git clone (https://github.com/rea-prince/FriendFinder.git)
-cd Friend-Finder
+cd FriendFinder
 ```
 
 2. Install dependencies.
