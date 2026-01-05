@@ -10,14 +10,13 @@ app.use(express.json());
 
 // API endpoint for HTML input
 app.post("/api/classmates", async (req, res) => {
-  const { termYearCode } = req.body;
-  const termCodeStr = termYearCode?.toString() || "";
-  const classmates = await getClassmates(termCodeStr);
+  const searchQuery = (req.body.searchQuery || "").toString();
 
   try {
-    const classmates = await getClassmates(termYearCode);
+    const classmates = await getClassmates(searchQuery);
     res.json(classmates);
   } catch (e) {
+    console.error("Error in /api/classmates:", e);
     res.status(500).json({ error: e.message });
   }
 });

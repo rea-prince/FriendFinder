@@ -2,7 +2,7 @@ const dotenv = require("dotenv");
 const fs = require("fs");
 const https = require("https");
 
-dotenv.config();
+dotenv.config("/src/.env");
 
 const accessToken = process.env.ACCESS_TOKEN;
 if (!accessToken) {
@@ -78,23 +78,26 @@ async function getClassmates(termYearCode) {
   const self = await canvasGet("/users/self");
   const selfUserId = self.id;
 
-  // loop through only filtered courses
-  for (const course of filteredCourses) {
-    const users = await canvasGet(
-      `/courses/${course.id}/users?enrollment_type[]=student&per_page=100`,
-    );
-    if (!Array.isArray(users)) continue;
+  await Promise.all(
+    filteredCourses.map(async (course) => {
+      const users = await canvasGet(
+        `/courses/${course.id}/users?enrollment_type[]=student&per_page=100`,
+      );
+      if (!Array.isArray(users)) return;
 
-    for (const user of users) {
-      if (user.id === selfUserId) continue;
-
-      if (!commonMap.has(user.id)) {
-        commonMap.set(user.id, { name: user.name, courses: [course.name] });
-      } else {
-        commonMap.get(user.id).courses.push(course.name);
-      }
-    }
-  }
+      users.forEach((user) => {
+        if (user.id === selfUserId) return;
+        if (!commonMap.has(user.id)) {
+          commonMap.set(user.id, {
+            name: user.name,
+            courses: [course.name],
+          });
+        } else {
+          commonMap.get(user.id).courses.push(course.name);
+        }
+      });
+    }),
+  );
 
   // convert map to array
   return Array.from(commonMap.entries())
@@ -104,7 +107,7 @@ async function getClassmates(termYearCode) {
       sharedCourses: info.courses,
       sharedCount: info.courses.length,
     }))
-    .filter((c) => c.sharedCount > 1) // ❌ remove people with only 1 shared class
+    .filter((c) => c.sharedCount > 1) // remove people with only 1 shared class
     .sort((a, b) => b.sharedCount - a.sharedCount); // sort descending
 }
 

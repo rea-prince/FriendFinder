@@ -3,12 +3,6 @@
     <head>
         <meta charset="UTF-8" />
         <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
-            rel="stylesheet"
-            integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
-            crossorigin="anonymous"
-        />
-        <link
             href="https://bootswatch.com/5/brite/bootstrap.min.css"
             rel="stylesheet"
             type="text/css"
@@ -19,8 +13,13 @@
             crossorigin="anonymous"
         ></script>
         <title>Classmates Shared Courses</title>
+        <style>
+            body::-webkit-scrollbar {
+                display: none;
+            }
+        </style>
     </head>
-    <body>
+    <body style="background-color: black">
         <script
             src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
@@ -50,9 +49,31 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarColor01">
-                    <ul class="navbar-nav me-auto">
+                    <ul class="navbar-nav">
                         <li><span class="nav-link">Friend Finder</span></li>
                     </ul>
+                    <form
+                        onsubmit="
+                            event.preventDefault();
+                            loadClassmates();
+                        "
+                        class="flex-grow-1"
+                    >
+                        <div class="d-flex gap-2">
+                            <input
+                                type="text"
+                                id="termInput"
+                                class="form-control flex-grow-1"
+                                placeholder="Input a school year and term - i.e. 1252 for A.Y. '25-'26, term 2"
+                                aria-label="Sizing example input"
+                                aria-describedby="inputGroup-sizing-default"
+                                maxlength="4"
+                            />
+                            <button onclick="submit" class="btn btn-warning">
+                                Load
+                            </button>
+                        </div>
+                    </form>
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
                             <a
@@ -62,11 +83,10 @@
                                 rel="noopener noreferrer"
                             >
                                 <img
-                                    src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg"
+                                    src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/github-white-icon.png"
                                     alt="GitHub"
                                     width="24"
                                     height="24"
-                                    style="filter: invert(1)"
                                 />
                                 GitHub
                             </a>
@@ -77,78 +97,104 @@
         </nav>
 
         <div class="container my-4">
-            <form
-                onsubmit="
-                    event.preventDefault();
-                    loadClassmates();
-                "
-            >
-                <div class="d-flex gap-2 input-group mb-3">
-                    <span
-                        class="input-group-text"
-                        id="inputGroup-sizing-default"
-                        >Enter a year and term</span
-                    >
-                    <input
-                        type="text"
-                        id="termInput"
-                        class="form-control"
-                        placeholder="i.e. 1252 for A.Y. '25-'26, term 2"
-                        aria-label="Sizing example input"
-                        aria-describedby="inputGroup-sizing-default"
-                        maxlength="4"
-                    />
-                    <button onclick="submit" class="btn btn-info">Load</button>
-                </div>
-            </form>
-
-            <table class="table table-striped" id="results">
+            <table class="table table-sm table-dark table-striped" id="results">
                 <thead style="white-space: nowrap">
-                    <tr class="table-success">
-                        <th scope="row">Name</th>
-                        <th>Shared Count</th>
-                        <th>Courses</th>
+                    <tr class="table-warning">
+                        <th
+                            scope="row"
+                            style="text-align: center; font-size: 1rem"
+                        >
+                            #
+                        </th>
+                        <th
+                            scope="row"
+                            style="text-align: center; font-size: 1rem"
+                        >
+                            Name
+                        </th>
+                        <th style="text-align: center; font-size: 1rem">
+                            # of Courses
+                        </th>
+                        <th style="text-align: center; font-size: 1rem">
+                            Mutual Courses
+                        </th>
                     </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", () => {
+                            const cachedData =
+                                sessionStorage.getItem("classmatesData");
+                            if (cachedData) {
+                                const lastTerm =
+                                    sessionStorage.getItem("lastTerm");
+                                if (lastTerm)
+                                    document.getElementById("termInput").value =
+                                        lastTerm;
+                                renderTable(JSON.parse(cachedData));
+                            }
+                        });
+
+                        async function loadClassmates() {
+                            const term =
+                                document.getElementById("termInput").value;
+                            console.log("Sending termYearCode:", term);
+
+                            const response = await fetch("/api/classmates", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    searchQuery: termInput.value,
+                                }),
+                            });
+
+                            if (!response.ok) {
+                                console.error(
+                                    "Fetch error:",
+                                    response.statusText,
+                                );
+                                return;
+                            }
+
+                            const data = await response.json();
+                            console.log("Received data:", data);
+
+                            // store in sessionStorage
+                            sessionStorage.setItem(
+                                "classmatesData",
+                                JSON.stringify(data),
+                            );
+                            sessionStorage.setItem("lastTerm", term);
+
+                            renderTable(data);
+                        }
+
+                        function renderTable(data) {
+                            let ctr = 1;
+                            const tbody =
+                                document.querySelector("#results tbody");
+                            tbody.innerHTML = "";
+                            data.forEach((c) => {
+                                const row = document.createElement("tr");
+                                row.innerHTML = `
+                                <td class="table-dark" style="text-align: right; font-size: 1rem;">${ctr}</td>
+                                <td class="table-dark" style="text-align: right; font-size: 1rem;">${c.name}</td>
+                                <td class="table-dark" style="font-weight: bold; font-size: 1rem; text-align: center;">${c.sharedCount}</td>
+                                <td class="table-dark" style="list-style-type: none; font-size: 1rem;"">
+                                    ${c.sharedCourses
+                                        .map((course) => {
+                                            return `<li>${course}</li>`;
+                                        })
+                                        .join("")}
+                                </td>
+                            `;
+                                tbody.appendChild(row);
+                                ctr++;
+                            });
+                        }
+                    </script>
+                </tbody>
             </table>
-
-            <script>
-                async function loadClassmates() {
-                    const term = document.getElementById("termInput").value;
-                    console.log("Sending termYearCode:", term); // log for debugging
-
-                    const response = await fetch("/api/classmates", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ termYearCode: term }),
-                    });
-
-                    if (!response.ok) {
-                        console.error("Fetch error:", response.statusText);
-                        return;
-                    }
-
-                    const data = await response.json();
-                    console.log("Received data:", data); // log for debugging
-
-                    const tbody = document.querySelector("#results tbody");
-                    tbody.innerHTML = "";
-                    data.forEach((c) => {
-                        const row = document.createElement("tr");
-                        row.innerHTML = `
-                          <td>${c.name}</td>
-                          <td><strong>${c.sharedCount}</strong></td>
-                          <td>
-                            <ul class="mb-0">
-                              ${c.sharedCourses.map((course) => `<li>${course}</li>`).join("")}
-                            </ul>
-                          </td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                }
-            </script>
         </div>
     </body>
 </html>
