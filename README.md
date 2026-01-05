@@ -3,7 +3,8 @@
 # Friend Finder
 Have you ever wondered who you share classes with? Friend Finder is a simple local-hosted webapp for students to see which classmates they share courses with, sorted by the most shared courses. Its main goal is to help students find friends and collaborators within the same term.
 
-<img width="1902" height="943" alt="image" src="https://github.com/user-attachments/assets/439eacc0-27dc-4a1c-bba1-ef5139a8f267" />
+<img width="1919" height="943" alt="image" src="https://github.com/user-attachments/assets/a8bd9462-4b6e-4394-9653-f9d3628b5217" />
+
 
 
 ## Features
