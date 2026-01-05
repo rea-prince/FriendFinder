@@ -17,7 +17,7 @@ Have you ever wondered who you share classes with? Friend Finder is a simple loc
 1. Clone the repository.
 
 ```bash
-git clone (https://github.com/rea-prince/Friend-Finder.git)
+git clone (https://github.com/rea-prince/FriendFinder.git)
 cd Friend-Finder
 ```
 
