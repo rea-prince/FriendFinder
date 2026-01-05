@@ -22,8 +22,8 @@ npm install
 ```
 
 3. Create a `.env` file containing your Canvas domain name as well as your generated access token.
-- ACCESS_TOKEN: Generate this in your Canvas profile under Account -> Settings -> New Access Token.
-- CANVAS_DOMAIN: Usually something like `your-school.instructure.com`.
+- `ACCESS_TOKEN`: Generate this in your Canvas profile under Account -> Settings -> New Access Token.
+- `CANVAS_DOMAIN`: Usually something like `your-school.instructure.com`.
 
 ```
 ACCESS_TOKEN=your_canvas_access_token
