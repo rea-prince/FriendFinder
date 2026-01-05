@@ -77,27 +77,35 @@
         </nav>
 
         <div class="container my-4">
-            <div class="d-flex gap-2 input-group mb-3">
-                <span class="input-group-text" id="inputGroup-sizing-default"
-                    >Enter a year and term</span
-                >
-                <input
-                    type="text"
-                    id="termInput"
-                    class="form-control"
-                    placeholder="i.e. 1252 for A.Y. '25-'26, term 2"
-                    aria-label="Sizing example input"
-                    aria-describedby="inputGroup-sizing-default"
-                />
-                <button onclick="loadClassmates()" class="btn btn-info">
-                    Load
-                </button>
-            </div>
+            <form
+                onsubmit="
+                    event.preventDefault();
+                    loadClassmates();
+                "
+            >
+                <div class="d-flex gap-2 input-group mb-3">
+                    <span
+                        class="input-group-text"
+                        id="inputGroup-sizing-default"
+                        >Enter a year and term</span
+                    >
+                    <input
+                        type="text"
+                        id="termInput"
+                        class="form-control"
+                        placeholder="i.e. 1252 for A.Y. '25-'26, term 2"
+                        aria-label="Sizing example input"
+                        aria-describedby="inputGroup-sizing-default"
+                        maxlength="4"
+                    />
+                    <button onclick="submit" class="btn btn-info">Load</button>
+                </div>
+            </form>
 
             <table class="table table-striped" id="results">
                 <thead style="white-space: nowrap">
-                    <tr>
-                        <th>Name</th>
+                    <tr class="table-success">
+                        <th scope="row">Name</th>
                         <th>Shared Count</th>
                         <th>Courses</th>
                     </tr>
@@ -128,7 +136,15 @@
                     tbody.innerHTML = "";
                     data.forEach((c) => {
                         const row = document.createElement("tr");
-                        row.innerHTML = `<td>${c.name}</td><td>${c.sharedCount}</td><td>${c.sharedCourses.join(", ")}</td>`;
+                        row.innerHTML = `
+                          <td>${c.name}</td>
+                          <td><strong>${c.sharedCount}</strong></td>
+                          <td>
+                            <ul class="mb-0">
+                              ${c.sharedCourses.map((course) => `<li>${course}</li>`).join("")}
+                            </ul>
+                          </td>
+                        `;
                         tbody.appendChild(row);
                     });
                 }
