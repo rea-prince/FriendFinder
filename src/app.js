@@ -62,7 +62,7 @@ function filterCoursesByTerm(courses, termYearCode) {
 async function getClassmates(termYearCode) {
   // get all courses
   const courses = await canvasGet(
-    "/courses?include[]=term&enrollment_state=active",
+    `/courses?enrollment_state=active&enrollment_term_id=sis_term_id:${termYearCode}&include[]=term`,
   );
   console.log(
     "All courses:",
