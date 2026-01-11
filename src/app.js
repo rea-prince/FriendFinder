@@ -54,14 +54,16 @@ function canvasGet(path) {
 // filter courses by term/year
 function filterCoursesByTerm(courses, termYearCode) {
   return courses.filter(
-    (c) => c.course_code && c.course_code.startsWith(termYearCode),
+    (c) => typeof c.name === "string" && c.name.includes(`${termYearCode}`),
   );
 }
 
 // classmate mapping
 async function getClassmates(termYearCode) {
   // get all courses
-  const courses = await canvasGet("/courses");
+  const courses = await canvasGet(
+    "/courses?include[]=term&enrollment_state=active",
+  );
   console.log(
     "All courses:",
     courses.map((c) => ({ id: c.id, code: c.course_code, name: c.name })),
@@ -70,9 +72,7 @@ async function getClassmates(termYearCode) {
   // filter by term/year
   console.log("Filtering for term:", termYearCode);
   courses.forEach((c) => console.log(c.id, c.course_code, c.name));
-  const filteredCourses = courses.filter(
-    (c) => c.name && c.name.includes(termYearCode),
-  );
+  const filteredCourses = filterCoursesByTerm(courses, termYearCode);
 
   const commonMap = new Map();
   const self = await canvasGet("/users/self");
@@ -107,8 +107,8 @@ async function getClassmates(termYearCode) {
       sharedCourses: info.courses,
       sharedCount: info.courses.length,
     }))
-    .filter((c) => c.sharedCount > 1) // remove people with only 1 shared class
     .sort((a, b) => b.sharedCount - a.sharedCount); // sort descending
+  // .filter((c) => c.sharedCount > 1) // remove people with only 1 shared class
 }
 
 module.exports = { getClassmates };
