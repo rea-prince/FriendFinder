@@ -17,8 +17,8 @@ Have you ever wondered who you share classes with? Friend Finder is a simple loc
 1. Clone the repository.
 
 ```bash
-git clone (https://github.com/rea-prince/Friend-Finder.git)
-cd Friend-Finder
+git clone (https://github.com/rea-prince/FriendFinder.git)
+cd FriendFinder
 ```
 
 2. Install dependencies.
@@ -42,7 +42,7 @@ CANVAS_DOMAIN=your_canvas_domain
 node src/server.js
 ```
 
-5. Open the webapp by going to `http://localhost:3000` and entering a term/year code (like 1252) to see classmates for that term.
+5. Open the webapp by going to `http://localhost:3000` and entering a term/year code (like 1252) to see classmates for that term. Leave the search bar blank to search through all enrolled courses.
 
 ## Disclaimer
 - For personal use only. Friend Finder is intended for students to find friends and collaborators.
