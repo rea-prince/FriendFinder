@@ -2,7 +2,7 @@ const dotenv = require("dotenv");
 const fs = require("fs");
 const https = require("https");
 
-dotenv.config("/src/.env");
+dotenv.config("./.env");
 
 const accessToken = process.env.ACCESS_TOKEN;
 if (!accessToken) {
@@ -40,8 +40,8 @@ function canvasGet(path) {
       res.on("end", () => {
         try {
           resolve(JSON.parse(data));
-        } catch (e) {
-          reject(e);
+        } catch (error) {
+          reject(error);
         }
       });
     });
@@ -51,49 +51,64 @@ function canvasGet(path) {
   });
 }
 
-// filter courses by term/year
-function filterCoursesByTerm(courses, termYearCode) {
-  return courses.filter(
-    (c) => typeof c.name === "string" && c.name.includes(`${termYearCode}`),
-  );
+// get user terms
+async function getTerms() {
+  const courses = await canvasGet("/courses?include[]=term");
+  if (!Array.isArray(courses)) return [];
+
+  const termsMap = new Map();
+  courses.forEach((c) => {
+    if (c.term) {
+      termsMap.set(c.term.id, {
+        id: c.term.id,
+        name: c.term.name,
+      });
+    }
+  });
+
+  return Array.from(termsMap.values());
 }
 
 // classmate mapping
 async function getClassmates(termYearCode) {
   // get all courses
-  const courses = await canvasGet(
-    `/courses?enrollment_state=active&enrollment_term_id=sis_term_id:${termYearCode}&include[]=term`,
+  const allCourses = await canvasGet(
+    `/courses?enrollment_term_id=${termYearCode}&per_page=100`,
   );
-  console.log(
-    "All courses:",
-    courses.map((c) => ({ id: c.id, code: c.course_code, name: c.name })),
-  );
+  if (!Array.isArray(allCourses) || allCourses.length === 0) {
+    console.log("No active courses found for this term.");
+    return [];
+  }
 
-  // filter by term/year
-  console.log("Filtering for term:", termYearCode);
-  courses.forEach((c) => console.log(c.id, c.course_code, c.name));
-  const filteredCourses = filterCoursesByTerm(courses, termYearCode);
+  const courses = allCourses.filter(
+    (c) => String(c.enrollment_term_id) === String(termYearCode),
+  );
+  console.log(`Found ${courses.length} courses for Term ID ${termYearCode}`);
 
   const commonMap = new Map();
   const self = await canvasGet("/users/self");
   const selfUserId = self.id;
 
   await Promise.all(
-    filteredCourses.map(async (course) => {
+    courses.map(async (course) => {
       const users = await canvasGet(
         `/courses/${course.id}/users?enrollment_type[]=student&per_page=100`,
       );
+
       if (!Array.isArray(users)) return;
 
       users.forEach((user) => {
         if (user.id === selfUserId) return;
+
         if (!commonMap.has(user.id)) {
           commonMap.set(user.id, {
             name: user.name,
             courses: [course.name],
           });
         } else {
-          commonMap.get(user.id).courses.push(course.name);
+          if (!commonMap.get(user.id).courses.includes(course.name)) {
+            commonMap.get(user.id).courses.push(course.name);
+          }
         }
       });
     }),
@@ -107,8 +122,7 @@ async function getClassmates(termYearCode) {
       sharedCourses: info.courses,
       sharedCount: info.courses.length,
     }))
-    .sort((a, b) => b.sharedCount - a.sharedCount); // sort descending
-  // .filter((c) => c.sharedCount > 1) // remove people with only 1 shared class
+    .sort((a, b) => b.sharedCount - a.sharedCount);
 }
 
-module.exports = { getClassmates };
+module.exports = { getClassmates, getTerms };

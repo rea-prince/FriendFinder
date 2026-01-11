@@ -17,6 +17,10 @@
             body::-webkit-scrollbar {
                 display: none;
             }
+            #results th {
+                white-space: nowrap;
+                vertical-align: middle;
+            }
         </style>
     </head>
     <body>
@@ -59,17 +63,16 @@
                         "
                         class="flex-grow-1"
                     >
-                        <div class="d-flex gap-2">
-                            <input
-                                type="text"
+                        <div class="d-flex gap-2 dropdown">
+                            <select
                                 id="termInput"
-                                class="form-control flex-grow-1"
-                                placeholder="Input a school year and term - i.e. 1252 for A.Y. '25-'26, term 2"
-                                aria-label="Sizing example input"
-                                aria-describedby="inputGroup-sizing-default"
-                                maxlength="4"
-                            />
-                            <button onclick="submit" class="btn btn-warning">
+                                class="form-select flex-grow-1"
+                            >
+                                <option value="" disabled selected>
+                                    Loading terms...
+                                </option>
+                            </select>
+                            <button type="submit" class="btn btn-warning">
                                 Load
                             </button>
                         </div>
@@ -164,17 +167,39 @@
                 <tbody>
                     <script>
                         document.addEventListener("DOMContentLoaded", () => {
+                            fetchTerms();
+
                             const cachedData =
                                 sessionStorage.getItem("classmatesData");
                             if (cachedData) {
-                                const lastTerm =
-                                    sessionStorage.getItem("lastTerm");
-                                if (lastTerm)
-                                    document.getElementById("termInput").value =
-                                        lastTerm;
                                 renderTable(JSON.parse(cachedData));
                             }
                         });
+
+                        async function fetchTerms() {
+                            const select = document.getElementById("termInput");
+                            try {
+                                const response = await fetch("/api/terms");
+                                const terms = await response.json();
+
+                                select.innerHTML = "";
+
+                                terms.forEach((term) => {
+                                    const option =
+                                        document.createElement("option");
+                                    option.value = term.id;
+                                    option.textContent = term.name;
+                                    select.appendChild(option);
+                                });
+
+                                const lastTerm =
+                                    sessionStorage.getItem("lastTerm");
+                                if (lastTerm) select.value = lastTerm;
+                            } catch (error) {
+                                select.innerHTML = `<option>Error loading terms</option>`;
+                                console.error("Terms error:", error);
+                            }
+                        }
 
                         async function loadClassmates() {
                             const term =
