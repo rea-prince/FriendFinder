@@ -42,7 +42,7 @@ CANVAS_DOMAIN=your_canvas_domain
 node src/server.js
 ```
 
-5. Open the webapp by going to `http://localhost:3000` and entering a term/year code (like 1252) to see classmates for that term. Leave the search bar blank to search through all enrolled courses.
+5. Open the webapp by going to `http://localhost:3000` and entering a term/year code to see classmates for that term.
 
 ## Disclaimer
 - For personal use only. Friend Finder is intended for students to find friends and collaborators.
