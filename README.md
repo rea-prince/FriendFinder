@@ -1,5 +1,10 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=000)](#) [![Node.js](https://img.shields.io/badge/Node.js-6DA55F?logo=node.js&logoColor=white)](#) [![Express.js](https://img.shields.io/badge/Express.js-%23404d59.svg?logo=express&logoColor=%2361DAFB)](#) 
 
+> [!Important] 
+>  I'm not sure if this still works as I can no longer generate tokens :(
+
+---
+
 # Friend Finder
 Have you ever wondered who you share classes with? Friend Finder is a simple local-hosted webapp for students to see which classmates they share courses with, sorted by the most shared courses. Its main goal is to help students find friends and collaborators within the same term.
 
